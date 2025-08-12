@@ -1,0 +1,115 @@
+{% extends 'finance/base.html' %}
+
+{% block content %}
+<h2>Добавить операцию</h2>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+
+    <!-- Кнопка для добавления новой категории -->
+    <div class="mb-3">
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#categoryModal">
+            + Добавить новую категорию
+        </button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Добавить</button>
+</form>
+<br>
+<a href="{% url 'history' %}">Посмотреть историю</a>
+
+<!-- Модальное окно для добавления категории -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Добавить новую категорию</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="categoryForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="categoryName" class="form-label">Название категории</label>
+            <input type="text" class="form-control" id="categoryName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Тип операции</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="is_income" id="incomeRadio" value="true" checked>
+                <label class="form-check-label" for="incomeRadio">Доход</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="is_income" id="expenseRadio" value="false">
+                <label class="form-check-label" for="expenseRadio">Расход</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="saveCategoryBtn">Создать</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const saveCategoryBtn = document.getElementById('saveCategoryBtn');
+
+  saveCategoryBtn.addEventListener('click', async function() {
+    const categoryName = document.getElementById('categoryName').value;
+    const isIncome = document.querySelector('input[name="is_income"]:checked').value === 'true';
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    if (!categoryName.trim()) {
+      alert('Введите название категории');
+      return;
+    }
+
+    try {
+      const response = await fetch('{% url "api_create_category" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          name: categoryName.trim(),
+          is_income: isIncome
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Добавляем новую категорию в выпадающий список
+        const categorySelect = document.querySelector('select[name="category"]');
+        const newOption = document.createElement('option');
+        newOption.value = data.id;
+        newOption.textContent = data.name;
+        newOption.selected = true;
+        categorySelect.appendChild(newOption);
+
+        // Закрываем модальное окно
+        const modalElement = document.getElementById('categoryModal');
+        const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+        modal.hide();
+
+        // Показываем уведомление
+        alert(`Категория "${data.name}" успешно добавлена!`);
+      } else {
+        alert(data.error || 'Ошибка при добавлении категории');
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Произошла ошибка при добавлении категории');
+    }
+  });
+});
+</script>
+{% endblock %}

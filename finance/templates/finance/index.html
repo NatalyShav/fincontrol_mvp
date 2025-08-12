@@ -1,0 +1,172 @@
+{% extends 'finance/base.html' %}
+
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4 mb-4">FinControl</h1>
+    <p class="lead mb-4">Сервис учета личных финансов с аналитикой и Telegram-ботом</p>
+    
+    {% if user.is_authenticated %}
+    <div class="mb-5">
+        <h2>Добро пожаловать, {{ user.username }}!</h2>
+        <p class="text-muted">Начните работу с финансами прямо сейчас</p>
+        <div class="mt-4">
+            <a href="{% url 'add_operation' %}" class="btn btn-primary btn-lg me-2">Добавить операцию</a>
+            <a href="{% url 'history' %}" class="btn btn-outline-secondary btn-lg">Посмотреть историю</a>
+        </div>
+    </div>
+
+ <div class="row mt-5">
+    <div class="col-md-4 mb-4">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title">Ваши финансы</h3>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-success">Доходы:</span>
+                <span class="fw-bold">{{ total_income }} ₽</span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-danger">Расходы:</span>
+                <span class="fw-bold">{{ total_expense }} ₽</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span class="fw-bold">Баланс:</span>
+                <span class="fw-bold text-primary">{{ balance }} ₽</span>
+            </div>
+        </div>
+    </div>
+</div>
+        
+        <div class="col-md-4 mb-4">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title">Последние операции</h3>
+            <ul class="list-group list-group-flush">
+                {% for t in recent_transactions %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ t.category.name }}</span>
+                    <span class="{% if t.category.is_income %}text-success{% else %}text-danger{% endif %}">
+                        {% if t.category.is_income %}+{% else %}-{% endif %}{{ t.amount }} ₽
+                    </span>
+                </li>
+                {% empty %}
+                <li class="list-group-item">Нет операций</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+        
+        <div class="col-md-4 mb-4">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title">Рекомендации</h3>
+            <ul class="list-group list-group-flush">
+                {% for rec in recommendations %}
+                <li class="list-group-item">{{ rec }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    <div class="mt-5">
+    <h2>Ваши графики</h2>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">Доходы и расходы по месяцам</h4>
+                    {% if chart_income_expense %}
+                        <img src="{{ chart_income_expense }}" class="img-fluid" alt="График доходов и расходов">
+                    {% else %}
+                        <p class="text-muted">Нет данных для построения графика</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">Распределение расходов</h4>
+                    {% if chart_category_distribution %}
+                        <img src="{{ chart_category_distribution }}" class="img-fluid" alt="Диаграмма распределения">
+                    {% else %}
+                        <p class="text-muted">Нет данных о расходах</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    {% else %}
+    <div class="mb-5">
+        <p class="mb-4">FinControl — это удобный сервис для учета личных финансов с продвинутой аналитикой и интеграцией с Telegram.</p>
+        <div>
+            <a href="{% url 'register' %}" class="btn btn-success btn-lg me-2">Зарегистрироваться</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Войти</a>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-start">
+                    <h3 class="card-title">Учет операций</h3>
+                    <p class="card-text">Легко добавляйте доходы и расходы с возможностью категоризации и подробного описания.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-start">
+                    <h3 class="card-title">Аналитика и графики</h3>
+                    <p class="card-text">Получайте наглядные графики и диаграммы по вашим финансам за разные периоды времени.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-start">
+                    <h3 class="card-title">Telegram-бот</h3>
+                    <p class="card-text">Добавляйте операции и получайте отчеты прямо в Telegram без необходимости открывать приложение.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-5">
+        <h2>Как это работает?</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h3 class="h5">1. Регистрация</h3>
+                        <p>Создайте аккаунт и привяжите Telegram для удобного управления</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h3 class="h5">2. Добавление операций</h3>
+                        <p>Фиксируйте доходы и расходы через веб-интерфейс или Telegram</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h3 class="h5">3. Анализ и рекомендации</h3>
+                        <p>Получайте аналитику и советы по улучшению финансовой ситуации</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

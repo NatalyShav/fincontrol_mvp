@@ -1,0 +1,9 @@
+{% extends 'finance/base.html' %}
+
+{% block content %}
+<h2>Привяжите Telegram</h2>
+<p>Перейдите по ссылке и начните чат с ботом:</p>
+<a href="{{ link }}" class="btn btn-success">Открыть в Telegram</a>
+<p><small>Ссылка действует один раз.</small></p>
+<a href="{% url 'home' %}" class="btn btn-secondary mt-3">Назад</a>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'finance/base.html' %}
+
+{% block content %}
+<h2>Планирование бюджета</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            {{ form.month.label_tag }}
+            {{ form.month }}
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            {{ form.planned_income.label_tag }}
+            {{ form.planned_income }}
+        </div>
+        <div class="col-md-6">
+            {{ form.planned_expense.label_tag }}
+            {{ form.planned_expense }}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить бюджет</button>
+</form>
+
+{% if budget %}
+<div class="mt-4">
+    <h3>Анализ бюджета за {{ budget.month|date:"F Y" }}</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Доходы</h5>
+                    <p class="card-text">
+                        Запланировано: {{ budget.planned_income }} ₽<br>
+                        Фактически: {{ total_income }} ₽<br>
+                        {% if income_diff > 0 %}
+                            <span class="text-success">Превышение: +{{ income_diff }} ₽</span>
+                        {% elif income_diff < 0 %}
+                            <span class="text-danger">Недостаток: {{ income_diff_abs }} ₽</span>
+                        {% else %}
+                            <span class="text-muted">Соответствует плану</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Расходы</h5>
+                    <p class="card-text">
+                        Запланировано: {{ budget.planned_expense }} ₽<br>
+                        Фактически: {{ total_expense }} ₽<br>
+                        {% if expense_diff > 0 %}
+                            <span class="text-danger">Превышение: +{{ expense_diff }} ₽</span>
+                        {% elif expense_diff < 0 %}
+                            <span class="text-success">Экономия: {{ expense_diff_abs }} ₽</span>
+                        {% else %}
+                            <span class="text-muted">Соответствует плану</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Остальной контент -->
+    <div class="mt-4">
+        <h3>Динамика бюджета</h3>
+        <p class="text-muted">История бюджета будет добавлена позже.</p>
+    </div>
+</div>
+{% endif %}
+
+<a href="{% url 'home' %}" class="btn btn-secondary mt-3">Назад к главной</a>
+{% endblock %}

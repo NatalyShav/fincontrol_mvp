@@ -1,0 +1,31 @@
+{% extends 'finance/base.html' %}
+{% block content %}
+<h2>История операций</h2>
+<table class="table">
+    <tr>
+        <th>Дата</th>
+        <th>Тип</th>
+        <th>Сумма</th>
+        <th>Категория</th>
+        <th>Описание</th>
+    </tr>
+    {% for op in transactions %}
+    <tr>
+        <td>{{ op.date }}</td>
+        <td>
+            {% if op.category.is_income %}
+                <span class="text-success">Доход</span>
+            {% else %}
+                <span class="text-danger">Расход</span>
+            {% endif %}
+        </td>
+        <td>{{ op.amount }}</td>
+        <td>{{ op.category.name }}</td>
+        <td>{{ op.description }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">Нет операций</td></tr>
+    {% endfor %}
+</table>
+<a href="{% url 'add_operation' %}">Добавить операцию</a>
+{% endblock %}
